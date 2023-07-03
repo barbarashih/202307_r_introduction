@@ -206,7 +206,7 @@ Q. What happens when you put a mixture of numbers and characters in a vector?
   # Q. Try the below. Why does it not return an error?
   x <- 1:5
   y <- c("a", "b")
-  x + y
+  paste0( x , y)
   ```
   <details>
     <summary>Answer</summary>
