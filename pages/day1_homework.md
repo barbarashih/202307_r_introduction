@@ -32,7 +32,7 @@ Copy/paste these code. They each have one or more intentional mistakes. Try and 
     mean(gene_exprs_df$Blood2)
 
     # Get the standard deviation for Brain2, Blood3 and Blood2
-    # You can use ?mean to look at the options for the function
+    # You can use ?sd to look at the options for the function
     sd(gene_exprs_df$Brain2)
     sd(gene_exprs_df$Blood3)
     sd(gene_exprs_df$Blood2)
@@ -47,7 +47,8 @@ Go to https://gtexportal.org/home/datasets. Under GTEx Analysis V8 > Annotations
 
 Import 2) into R Studio as a dataframe. 
 
-Filter the dataframe so you only keep "Skin - Sun Exposed (Lower leg)" samples
+Filter the dataframe so you only keep "Skin - Sun Exposed (Lower leg)" in the SMTSD column
+(use == for equal to)
 
 Filter the dataframe so you keep only "RNASEQ" samples
 
