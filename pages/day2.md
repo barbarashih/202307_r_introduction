@@ -252,6 +252,13 @@ myFun_colour <- function(favCol, leastFavCol){
 myFun_colour("red", "black")
 myFun_colour("red")
 ```
+<details><summary>Challenge 3.1</summary>
+
+### Challenge 3.1
+Write a function that takes in degree Celsius and returns Fahrenheit.
+
+</details>
+
 ### Task 3.3
 ```r
 # Setting a default
@@ -356,7 +363,7 @@ plot_df
 p1 <- ggplot(data = plot_df, aes(x=Gene1, y=group)) + geom_point()
 p1
 
-p2 <- ggplot(data = plot_df, aes(x=Gene2, y=group)) + geom_point()
+p2 <- ggplot(data = plot_df, aes(x=Gene2, y=group)) + geom_point() + ggtitle("title")
 p2
 
 grid.arrange(p1, p2, nrow=1)
