@@ -423,7 +423,8 @@ ggsave("output/plot_d2_t5-2.pdf", g)
 		p1 <- ggplot(data=plot_df, aes(x=x1, y=y)) + geom_point() + ggtitle(y) + theme_bw()
 		p2 <- ggplot(data=plot_df, aes(x=x2, y=y)) + geom_point() + ggtitle(y) + theme_bw()
 		g <- arrangeGrob(p1, p2, nrow=1)
-		
+		grid.draw(g)
+
 	}
 ```
 
@@ -438,11 +439,3 @@ ggsave("output/plot_d2_t5-2.pdf", g)
 	}
 ```
 
-
-	myFun_plot2 <- function(in_df, x1, x2, y){
-		plot_df <- data.frame(x1 = in_df[[x1]], x2 = in_df[[x2]], x3 = in_df[[x3]], y = in_df[[y]])
-		p1 <- ggplot(data=plot_df, aes(x=x1, y=y)) + geom_point() + ggtitle(y) + theme_bw()
-		p2 <- ggplot(data=plot_df, aes(x=x2, y=y)) + geom_point() + ggtitle(y) + theme_bw()
-		p3 <- ggplot(data=plot_df, aes(x=x2, y=y)) + geom_point() + ggtitle(y) + theme_bw()
-		grid.arrange(p1, p2, nrow=1)
-	}
