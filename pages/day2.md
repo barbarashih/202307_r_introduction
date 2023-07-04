@@ -94,7 +94,7 @@ working_dir <- "C:/Users/shihb/OneDrive - Lancaster University/work/teaching/wor
 setwd(working_dir)
 
 # Read in file
-sample_annotation <- read.delim("data/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt")
+sample_annotation <- read.delim("data/day2/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt")
 # Keep rows where the SMTSD column that has "Skin - Not Sun Exposed (Suprapubic)" or "Skin - Sun Exposed (Lower leg)"
 keep <- sample_annotation$SMTSD %in% c("Skin - Not Sun Exposed (Suprapubic)", "Skin - Sun Exposed (Lower leg)")
 keep <- grep("Skin", sample_annotation$SMTSD)
@@ -308,8 +308,8 @@ working_dir <- "C:/Users/shihb/OneDrive - Lancaster University/work/teaching/wor
 setwd(working_dir)
 
 # Read in metadata
-sample_annotation_fp <- "data/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt"
-subject_annotation_fp <- "data/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt"
+sample_annotation_fp <- "data/day2/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt"
+subject_annotation_fp <- "data/day2/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt"
 sample_annotation <- read.delim(sample_annotation_fp)
 subject_annotation <- read.delim(subject_annotation_fp)
 
@@ -339,7 +339,18 @@ combined_lapply <- lapply(sampleID_split, FUN=function(x)paste0(x[1], "-", x[2])
 # apply (takes data frame or matrix as inputs and return vectors, lists or array)
 head(sample_annotation[,1:5])
 combined_apply <- apply(sample_annotation, MARGIN=1, FUN=function(x)paste0(strsplit(x[1], "-")[[1]][1:2], collapse="-"))
+
 ```
+
+### Task 4.4. Merge sample_annotation with subject_annotation
+```r
+# Now you can add a SUBJID column to sample_annotation 
+sample_annotation$SUBJID <- combined_apply
+sample_annotation <- merge(sample_annotation, subject_annotation, by.x="SUBJID", by.y="SUBJID")
+
+```
+
+
 <br> </br>
 
 
@@ -356,18 +367,22 @@ install.packages("gridExtra")
 ```r
 # Importing libraries
 library(ggplot2)
+library(gridExtra)
 
 plot_df <- data.frame(Gene1=1:10, Gene2=10:1, Group=c(rep("Group1", 5), rep("Group2", 5)))
 plot_df
 
-p1 <- ggplot(data = plot_df, aes(x=Gene1, y=group)) + geom_point()
+p1 <- ggplot(data = plot_df, aes(x=Group, y=Gene1)) + geom_point()
 p1
 
-p2 <- ggplot(data = plot_df, aes(x=Gene2, y=group)) + geom_point() + ggtitle("title")
+p2 <- ggplot(data = plot_df, aes(x=Group, y=Gene2)) + geom_point() + ggtitle("title") + theme_bw()
 p2
 
-grid.arrange(p1, p2, nrow=1)
-ggsave("output/plot_d2_t5-2.pdf")
+
+
+g <- arrangeGrob(p1, p2, nrow=1)
+grid.draw(g)
+ggsave("output/plot_d2_t5-2.pdf", g)
 
 ```
 
@@ -390,7 +405,7 @@ ggsave("output/plot_d2_t5-2.pdf")
   gene_exprs_num <- t(gene_exprs_num)
   gene_exprs_num <- as.data.frame(gene_exprs_num)
   colnames(gene_exprs_num) <- gene_exprs$Description
-  gene_exprs_num$SAMPID <- colnames(gene_exprs_num)
+  gene_exprs_num$SAMPID <- rownames(gene_exprs_num)
   gene_exprs_num$SAMPID <- gsub("\\.", "-", gene_exprs_num$SAMPID)
 
   # Filter sample annotation 
@@ -404,10 +419,11 @@ ggsave("output/plot_d2_t5-2.pdf")
 ### Task 6.3. Make a plotting function
 ```r
 	myFun_plot <- function(in_df, x1, x2, y){
-		plot_df <- data.frame(x = in_df[[x]], y1=in_df[[y1]], y2=in_df[[y2]])
-		p1 <- ggplot(data=plot_df, ase(x=x1, y=y)) + geom_point() + ggtitle(y)
-		p2 <- ggplot(data=plot_df, ase(x=x2, y=y)) + geom_point() + ggtitle(y)
-		grid.arrange(p1, p2, nrow=1)
+		plot_df <- data.frame(x1 = in_df[[x1]], x2 = in_df[[x2]], y = in_df[[y]])
+		p1 <- ggplot(data=plot_df, aes(x=x1, y=y)) + geom_point() + ggtitle(y) + theme_bw()
+		p2 <- ggplot(data=plot_df, aes(x=x2, y=y)) + geom_point() + ggtitle(y) + theme_bw()
+		g <- arrangeGrob(p1, p2, nrow=1)
+		
 	}
 ```
 
@@ -421,3 +437,12 @@ ggsave("output/plot_d2_t5-2.pdf")
 		myFun_plot(gene_exprs_annotated, x1="AGE", x2="SMTSD", y=gene)
 	}
 ```
+
+
+	myFun_plot2 <- function(in_df, x1, x2, y){
+		plot_df <- data.frame(x1 = in_df[[x1]], x2 = in_df[[x2]], x3 = in_df[[x3]], y = in_df[[y]])
+		p1 <- ggplot(data=plot_df, aes(x=x1, y=y)) + geom_point() + ggtitle(y) + theme_bw()
+		p2 <- ggplot(data=plot_df, aes(x=x2, y=y)) + geom_point() + ggtitle(y) + theme_bw()
+		p3 <- ggplot(data=plot_df, aes(x=x2, y=y)) + geom_point() + ggtitle(y) + theme_bw()
+		grid.arrange(p1, p2, nrow=1)
+	}

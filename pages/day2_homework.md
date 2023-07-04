@@ -62,9 +62,9 @@ Copy/paste these code, and try to fix them to make working code
 
 
 ## Tasks
-### Task 1. Download data from GTEx
-Go to https://gtexportal.org/home/datasets. 
-1. Under GTEx Analysis V8 > RNA-Seq data, click on "Gene TPM by tissue"
-1. Download gene_tpm_2017-06-05_v8_skin_sun_exposed_lower_leg.gct.gz
-1. Extract the downloaded gtc.gz file (you can unzip .gz file using 7-zip)
-1. Import the extracted file into R (you might want to either edit this .gct file, or ignore the first 2 lines when importing the file)
+### Task 1.
+Repeat section 6 of the tutorial, but with these changes:
+- Save each figure you have created in the loop.
+- Make 3 plots, with the 3rd plot using gender on x-axis
+- Arrange the 3 plots in 2x2 (i.e. plot a square)
+
