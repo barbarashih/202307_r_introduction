@@ -30,6 +30,7 @@ str(myMeals)
 ```r
 # You can use double square brackets or dollar sign to refer to an element within the list
 # double square bracket is a more accurate way of referencing
+# Dollar sign looks neater and is more commonly used, but is less accurate and occassionally doesn't work for some R packages
 myMeals[["breakfast"]]
 myMeals$breakfast
 # You can also chain the referencing
@@ -49,12 +50,15 @@ myMeals[["breakfast"]]$food
 # The difference between double/single square brackets 
 doubleBracket <- myMeals[["breakfast"]]
 singleBracket <- myMeals["breakfast"]
+class(doubleBracket)
+class(singleBracket)
 myMeals[["breakfast"]][["food"]]
 myMeals[["breakfast"]]["food"]
+
 ```
-Q. What is the difference between double and single square bracket?
+Q. What is the difference between double and single square brackets?
 <details><summary>Answer</summary>
-Single square bracket is used to access a subset of the dataframe/list, so the data type remain the same. If you use single square bracket to access a column in a dataframe, you would get a dataframe. If you use double square bracket, you would extract the element and get a vector (in the case of a dataframe).
+Single square bracket is used to access a subset of the dataframe/list, and the data type remain the same. For example, if you use single square brackets to access a column in a dataframe, you would get a dataframe. If you use double square brackets, you would extract the element and get a vector.
 </details>
 
 ```r
@@ -64,7 +68,13 @@ myMeals$b # $ sign called the element name most similar to "b" (in this case, br
 myMeals$b$fo # $ sign called the element name most similar to "fo" (in this case, food)
 myMeals[["b"]] # This would give an error because there isn't an element named "b"
 ```
-Q. Make a vector object containing food items from breakfast and lunch.
+Q. Make a vector object containing food items from breakfast and lunch for the list below.
+```r
+myMeals <- list(breakfast=data.frame(food=c("toast", "egg", "coffee"), cost=c(1,3,3)), 
+                lunch=c("sandwich", "crisps"), 
+                dinner=c("pie", "apple"))
+```
+
 <details>
 <summary>Answer</summary>
 
@@ -86,14 +96,17 @@ setwd(working_dir)
 # Read in file
 sample_annotation <- read.delim("data/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt")
 # Keep rows where the SMTSD column that has "Skin - Not Sun Exposed (Suprapubic)" or "Skin - Sun Exposed (Lower leg)"
-sample_annotation <- sample_annotation[sample_annotation$SMTSD %in% c("Skin - Not Sun Exposed (Suprapubic)", "Skin - Sun Exposed (Lower leg)"),]
+keep <- sample_annotation$SMTSD %in% c("Skin - Not Sun Exposed (Suprapubic)", "Skin - Sun Exposed (Lower leg)")
+keep <- grep("Skin", sample_annotation$SMTSD)
+sample_annotation_filt <- sample_annotation[ keep , ]
+
+
 # Split the dataframe by the column SMTSD
-sample_annotation_list <- split(sample_annotation, sample_annotation$SMTSD)
+sample_annotation_list <- split(sample_annotation_filt, sample_annotation_filt$SMTSD)
 # Explore what the generated list looks like
 class(sample_annotation_list)
 head(sample_annotation_list)
 names(sample_annotation_list)
-
 ```
 
 ### Task 1.4. Split a character or a character vector into a list
@@ -131,12 +144,13 @@ Q. Why do you think strsplit returns a list instead of a vector or a dataframe?
 ## 2. Loops
 ### Task 2.1. Basic loop
 ```r
-# Loops are very useful for doing a similar process multiple times
+# Loops are very useful for repeating a series of processes 
 # Go from 1 to 5
 for(idx in 1:5){
 	print(idx)
 }
-# You can refer to each element of a vector or list
+# You can refer to each element of a vector or list in loops
+items <- c("banana", "orange", "apple")
 for(current_item in items){
 	print_text <- paste0("This is: ", current_item)
 	print(print_text)
@@ -146,8 +160,7 @@ for(current_item in items){
 
 ### Task 2.2. Loop through a vector/list through its index
 ```r
-# You can use index in loop to refer to different parts of a vector or list
-items <- c("banana", "orange", "apple")
+# You can use indexes in loops to refer to different parts of a vector or list
 for(idx in 1:length(items)){
 	current_item <- items[idx]
 	print_text <- paste0("This is: ", current_item)
@@ -322,54 +335,82 @@ combined_apply <- apply(sample_annotation, MARGIN=1, FUN=function(x)paste0(strsp
 ```
 <br> </br>
 
-## 5. If statements
-### Task 5.1
-```r
-# Now we can merge between the subject metadata and sample metadata
-sample_annotation$SUBJID <- combined
-sample_annotation <- merge(sample_annotation, subject_annotation, by.x="SUBJID", by.y="SUBJID")
 
-# Let's annotate age group
-unique(sample_annotation$AGE)
-ageGroup <- vector()
-for(idx in 1:length(sample_annotation$AGE )){
-    current_age <- sample_annotation$AGE[idx]
-    if(current_age %in% c("60-69", "70-79")){
-        ageGroup[idx] <- "Old"
-    } else if(current_age %in% c("20-29", "30-39")){
-        ageGroup[idx] <- "Young"
-    } else {
-        ageGroup[idx] <- "Middle"
-    }
-}
-sample_annotation$ageGroup <- ageGroup
-```
-### Task 5.2
-```r
-# Short way to do the same thing
-sample_annotation$ageGroup <- ifelse(sample_annotation$AGE %in% c("60-69", "70-79"), "Old", ifelse(sample_annotation$AGE %in% c("20-29", "30-39"), "Young", "Middle"))
-
-```
-
-<br> </br>
-
-## 6. Libraries
-### Task 6.1. Install a library
+## 5. Libraries
+### Task 5.1. Install a library
 ```r
 # Other people have made libraries of useful functions
 # Installing libraries
 install.packages("ggplot2")
+install.packages("gridExtra")
 ```
 
-### Task 6.2. Use ggplot2 library
+### Task 5.2. Use ggplot2 library
 ```r
 # Importing libraries
 library(ggplot2)
 
-plot_df <- data.frame(Gene1=1:10, Gene2=1:10, Group=c(rep("Group1", 5), rep("Group2", 5)))
+plot_df <- data.frame(Gene1=1:10, Gene2=10:1, Group=c(rep("Group1", 5), rep("Group2", 5)))
 plot_df
 
-p <- ggplot(data = plot_df, aes(x=Gene1, y=Gene2)) + geom_point()
-p
+p1 <- ggplot(data = plot_df, aes(x=Gene1, y=group)) + geom_point()
+p1
 
+p2 <- ggplot(data = plot_df, aes(x=Gene2, y=group)) + geom_point()
+p2
+
+grid.arrange(p1, p2, nrow=1)
+ggsave("output/plot_d2_t5-2.pdf")
+
+```
+
+
+## 6. Putting it all together
+## Aim to do
+1. Import the GTEx gene expression data
+1. Annotate the gene expression data with sample and subject/gender annotation
+1. Create a function that can be used to plot a gene
+1. Plot 10 genes in a loop (TERT,ELOVL3,FADS1,KRT79,ACO1,MGST1,PLAUR,CSF3R,MAPK10,DKK3)
+### Task 6.1. Download trimmed GTEx gene expression data
+
+### Task 6.2. Import and reorganise the gene expression data 
+```r
+  # Read in the file
+  in_fp <- "data/day2/gtex_gene_exprs.csv"
+  gene_exprs <- read.table(in_fp, header=TRUE, sep=',')
+  # Rotate the table
+  gene_exprs_num <- gene_exprs[,grep("GTEX", colnames(gene_exprs))]
+  gene_exprs_num <- t(gene_exprs_num)
+  gene_exprs_num <- as.data.frame(gene_exprs_num)
+  colnames(gene_exprs_num) <- gene_exprs$Description
+  gene_exprs_num$SAMPID <- colnames(gene_exprs_num)
+  gene_exprs_num$SAMPID <- gsub("\\.", "-", gene_exprs_num$SAMPID)
+
+  # Filter sample annotation 
+  sample_annotation_filt <- sample_annotation[,c("SUBJID", "SAMPID", "AGE", "SEX", "SMTSD")]
+
+  # Annotate the gene expression data
+  gene_exprs_annotated <- merge(sample_annotation_filt, gene_exprs_num, by.x="SAMPID", by.y="SAMPID")
+
+```
+
+### Task 6.3. Make a plotting function
+```r
+	myFun_plot <- function(in_df, x1, x2, y){
+		plot_df <- data.frame(x = in_df[[x]], y1=in_df[[y1]], y2=in_df[[y2]])
+		p1 <- ggplot(data=plot_df, ase(x=x1, y=y)) + geom_point() + ggtitle(y)
+		p2 <- ggplot(data=plot_df, ase(x=x2, y=y)) + geom_point() + ggtitle(y)
+		grid.arrange(p1, p2, nrow=1)
+	}
+```
+
+### Task 6.4. Loop through the genes
+```r
+	# Organise your genes
+	genes <- "TERT,ELOVL3,FADS1,KRT79,ACO1,MGST1,PLAUR,CSF3R,MAPK10,DKK3"
+	genes <- strsplit(genes, ",")[[1]]
+	# Loop through the genes
+	for(gene in genes){
+		myFun_plot(gene_exprs_annotated, x1="AGE", x2="SMTSD", y=gene)
+	}
 ```
