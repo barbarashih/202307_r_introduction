@@ -160,7 +160,7 @@ gsub("a.*a", "12345", c("apple", "banana", "guava", "avocado"))
 		p1 <- ggplot(data=plot_df, aes(x=x, y=y)) + 
           geom_point() + 
           ggtitle(y) + 
-          xlab(x)) +
+          xlab(x) +
           ylab(y) +
           theme_bw()
         print(p1)
