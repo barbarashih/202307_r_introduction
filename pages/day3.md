@@ -108,7 +108,7 @@ ggsave("output/plot_d2_t5-2.pdf", g)
 1. Import the GTEx gene expression data
 1. Annotate the gene expression data with sample and subject/gender annotation
 1. Create a function that can be used to plot a gene
-1. Plot 10 genes in a loop (TERT,ELOVL3,FADS1,KRT79,ACO1,MGST1,PLAUR,CSF3R,MAPK10,DKK3)
+1. Plot 3 genes in a loop (TERT,ELOVL3,KRT79)
 ### Task 3.1. Download trimmed GTEx gene expression data
 https://raw.githubusercontent.com/barbarashih/202307_r_introduction/main/data/day3/gtex_gene_exprs.csv
 
@@ -234,7 +234,7 @@ library(ggplot2)
 plot_df <- merge(sample_annotation_filt, gene_exprs_num, by.x="SAMPID", by.y="SAMPID")
 
 # plot
-p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79)) + geom_point()
+p <- ggplot(data = plot_df, aes(x=SMTSD, y=TERT)) + geom_point()
 p
 
 ```
@@ -251,66 +251,100 @@ p + facet_wrap(~ageGroup) + theme_bw()
 ### Task 5.3. Group by categorical data
 ```r
 # Spread the points so they don't overlap each other
-p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79)) + 
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT)) + 
   geom_point(position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw()
 # Colour points by AGE
-p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, colour=AGE)) + 
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw()
 p
-# Change point shapes
-p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, colour=AGE, shape=SEX)) + 
+```
+
+### Task 5.4. Change y-axis to log-scale
+```r
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD, shape=SEX)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
-  theme_bw()
+  theme_bw() + scale_y_log10()
+p
+```
+
+### Task 5.5. Dot shape, colour and fill
+```r
+# Change all shapes into a specified shpae
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD)) + 
+  geom_point(size = 5, shape=21, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() + scale_y_log10() +
+  scale_shape_manual(values=c(21, 25))
+p
+# Change point shapes
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD, shape=SEX)) + 
+  geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() + scale_y_log10() 
 p
 head(plot_df)
 # if TRUE, do something, otherwise something else
 plot_df$SEX <- ifelse(plot_df$SEX == 1, "M", "F")
-```
-
-### Task 5.4. Dot shape, colour and fill
-```r
-# Change all shapes into a specified shpae
-p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79)) + 
-  geom_point(size = 5, shape=21, position = position_jitter(w = 0.2, h = 0)) + 
-  theme_bw() + scale_shape_manual(values=c(21, 25))
-p
-
-# Change shape by the values of a column
-p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, shape=SEX)) + 
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD, shape=SEX)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
-  theme_bw() + scale_shape_manual(values=c(21, 25))
+  theme_bw() + scale_y_log10()
+p
+# Change shape by the values of a column
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD, shape=SEX)) + 
+  geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() + scale_y_log10() +
+  scale_shape_manual(values=c(21, 25))
 p
 
 # Change colour by the values of a column
-p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, colour=AGE, shape=SEX)) + 
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD, shape=SEX)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
-  theme_bw() + scale_shape_manual(values=c(21, 25))
+  theme_bw() +  scale_y_log10() +
+  scale_shape_manual(values=c(21, 25))
 p
 
 # Change fill by the values of a column
-p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, fill=AGE, shape=SEX)) + 
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, fill=SMTSD, shape=SEX)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
-  theme_bw() + scale_shape_manual(values=c(21, 25))
+  theme_bw() +  scale_y_log10() +
+  scale_shape_manual(values=c(21, 25))
 p
 
 ```
 
-### Task 5.5. Factors
+### Task 5.6. Factors
 ```r
+# Change fill by the values of a column
+p <- ggplot(data = plot_df, aes(x=ageGroup, y=TERT, fill=SMTSD, shape=SEX)) + 
+  geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() +  scale_y_log10() +
+  scale_shape_manual(values=c(21, 25))
+p
 # The plots are automatically sorted by alphabetical order 
 # You can specify the order by using factors
-plot_df$AGE_f <- factor(plot_df$AGE, levels = c("Young", "Middle", "Old"))
+plot_df$ageGroup_f <- factor(plot_df$ageGroup, levels = c("Young", "Middle", "Old"))
 
-plot_df$AGE_f2 <- plot_df$AGE_f 
-levels(plot_df$AGE_f2) <- c("Y", "M", "O")
-head(plot_df[, c("AGE", "AGE_f", "AGE_f2")])
+p <- ggplot(data = plot_df, aes(x=ageGroup_f, y=TERT, fill=SMTSD, shape=SEX)) + 
+  geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() +  scale_y_log10() +
+  scale_shape_manual(values=c(21, 25))
+p
+
+# You can change the factors levels
+plot_df$ageGroup_f2 <- plot_df$ageGroup_f 
+levels(plot_df$ageGroup_f2) <- c("Y", "M", "O")
+
+p <- ggplot(data = plot_df, aes(x=ageGroup_f2, y=TERT, fill=SMTSD, shape=SEX)) + 
+  geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() +  scale_y_log10() +
+  scale_shape_manual(values=c(21, 25))
+p
+
 
 ```
 
 
-### Task 5.6. Change default colours
+### Task 5.7. Change default colours
 ```r
 # Change colour schemes
 # Install library
