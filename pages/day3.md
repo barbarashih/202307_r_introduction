@@ -51,6 +51,7 @@ combined_lapply <- lapply(sampleID_split, FUN=function(x)paste0(x[1], "-", x[2])
 # apply (takes data frame or matrix as inputs and return vectors, lists or array)
 head(sample_annotation[,1:5])
 combined_apply <- apply(sample_annotation, MARGIN=1, FUN=function(x)paste0(strsplit(x[1], "-")[[1]][1:2], collapse="-"))
+head(combined_apply)
 
 ```
 
@@ -58,7 +59,9 @@ combined_apply <- apply(sample_annotation, MARGIN=1, FUN=function(x)paste0(strsp
 ```r
 # Now you can add a SUBJID column to sample_annotation 
 sample_annotation$SUBJID <- combined_apply
+str(sample_annotation)
 sample_annotation <- merge(sample_annotation, subject_annotation, by.x="SUBJID", by.y="SUBJID")
+str(sample_annotation)
 
 ```
 
@@ -79,6 +82,7 @@ install.packages("gridExtra")
 ```r
 # Importing libraries
 library(ggplot2)
+library(grid)
 library(gridExtra)
 
 plot_df <- data.frame(Gene1=1:10, Gene2=10:1, Group=c(rep("Group1", 5), rep("Group2", 5)))
@@ -153,7 +157,12 @@ gsub("a.*a", "12345", c("apple", "banana", "guava", "avocado"))
 ```r
 	myFun_plot <- function(in_df, x, y){
 		plot_df <- data.frame(x = in_df[[x]], y = in_df[[y]])
-		p1 <- ggplot(data=plot_df, aes(x=x, y=y)) + geom_point() + ggtitle(y) + theme_bw()
+		p1 <- ggplot(data=plot_df, aes(x=x, y=y)) + 
+          geom_point() + 
+          ggtitle(y) + 
+          xlab(x)) +
+          ylab(y) +
+          theme_bw()
         print(p1)
 	}
 ```
@@ -161,7 +170,7 @@ gsub("a.*a", "12345", c("apple", "banana", "guava", "avocado"))
 ### Task 3.4. Loop through the genes
 ```r
 	# Organise your genes
-	genes <- "TERT,ELOVL3,FADS1,KRT79,ACO1,MGST1,PLAUR,CSF3R,MAPK10,DKK3"
+	genes <- "TERT,ELOVL3,KRT79"
 	genes <- strsplit(genes, ",")[[1]]
 	# Loop through the genes
 	for(current_gene in genes){
@@ -177,16 +186,17 @@ gsub("a.*a", "12345", c("apple", "banana", "guava", "avocado"))
 		    myFun_plot(gene_exprs_annotated, x=current_annotation, y=current_gene)
         }
     }
+    
 ```
 
 ## 4. If statements
 ### Task 4.1
 ```r
 # Annotate age groups
-unique(sample_annotation$AGE)
+unique(sample_annotation_filt$AGE)
 ageGroup <- vector()
-for(idx in 1:length(sample_annotation$AGE )){
-    current_age <- sample_annotation$AGE[idx]
+for(idx in 1:length(sample_annotation_filt$AGE )){
+    current_age <- sample_annotation_filt$AGE[idx]
     if(current_age %in% c("60-69", "70-79")){
         ageGroup[idx] <- "Old"
     } else if(current_age %in% c("20-29", "30-39")){
@@ -195,7 +205,8 @@ for(idx in 1:length(sample_annotation$AGE )){
         ageGroup[idx] <- "Middle"
     }
 }
-sample_annotation$ageGroup <- ageGroup
+sample_annotation_filt$ageGroup <- ageGroup
+head(sample_annotation_filt)
 ```
 <details><summary>Challenge 4.1</summary>
 
@@ -203,9 +214,9 @@ sample_annotation$ageGroup <- ageGroup
 # Short way to do the same thing
 # Check out what ifelse does
 ?ifelse
-sample_annotation$ageGroup <- "Middle"
-sample_annotation$ageGroup <- ifelse(sample_annotation$AGE %in% c("60-69", "70-79"), "Old", sample_annotation$ageGroup)
-sample_annotation$ageGroup <- ifelse(sample_annotation$AGE %in% c("20-29", "30-39"), "Young", sample_annotation$ageGroup)
+sample_annotation_filt$ageGroup <- "Middle"
+sample_annotation_filt$ageGroup <- ifelse(sample_annotation_filt$AGE %in% c("60-69", "70-79"), "Old", sample_annotation_filt$ageGroup)
+sample_annotation_filt$ageGroup <- ifelse(sample_annotation_filt$AGE %in% c("20-29", "30-39"), "Young", sample_annotation_filt$ageGroup)
 ```
 </details>
 
@@ -220,7 +231,7 @@ sample_annotation$ageGroup <- ifelse(sample_annotation$AGE %in% c("20-29", "30-3
 library(ggplot2)
 
 # Annotate the gene expression data with the sample_annotation with age group
-gene_exprs_annotated <- merge(sample_annotation, gene_exprs_num, by.x="SAMPID", by.y="SAMPID")
+plot_df <- merge(sample_annotation_filt, gene_exprs_num, by.x="SAMPID", by.y="SAMPID")
 
 # plot
 p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79)) + geom_point()
@@ -253,12 +264,32 @@ p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, colour=AGE, shape=SEX)) +
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw()
 p
-# Colour vs fill
+head(plot_df)
+# if TRUE, do something, otherwise something else
+plot_df$SEX <- ifelse(plot_df$SEX == 1, "M", "F")
+```
+
+### Task 5.4. Dot shape, colour and fill
+```r
+# Change all shapes into a specified shpae
+p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79)) + 
+  geom_point(size = 5, shape=21, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() + scale_shape_manual(values=c(21, 25))
+p
+
+# Change shape by the values of a column
+p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, shape=SEX)) + 
+  geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() + scale_shape_manual(values=c(21, 25))
+p
+
+# Change colour by the values of a column
 p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, colour=AGE, shape=SEX)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw() + scale_shape_manual(values=c(21, 25))
 p
 
+# Change fill by the values of a column
 p <- ggplot(data = plot_df, aes(x=SMTSD, y=KRT79, fill=AGE, shape=SEX)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw() + scale_shape_manual(values=c(21, 25))
@@ -266,7 +297,7 @@ p
 
 ```
 
-### Task 5.4. Factors
+### Task 5.5. Factors
 ```r
 # The plots are automatically sorted by alphabetical order 
 # You can specify the order by using factors
@@ -279,7 +310,7 @@ head(plot_df[, c("AGE", "AGE_f", "AGE_f2")])
 ```
 
 
-### Task 5.5. Change default colours
+### Task 5.6. Change default colours
 ```r
 # Change colour schemes
 # Install library
