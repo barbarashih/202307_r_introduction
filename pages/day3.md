@@ -110,7 +110,7 @@ ggsave("output/plot_d2_t5-2.pdf", g)
 1. Create a function that can be used to plot a gene
 1. Plot 3 genes in a loop (TERT,ELOVL3,KRT79)
 ### Task 3.1. Download trimmed GTEx gene expression data
-https://raw.githubusercontent.com/barbarashih/202307_r_introduction/main/data/day3/gtex_gene_exprs.csv
+https://raw.githubusercontent.com/barbarashih/202307_r_introduction/main/data/day2/gtex_gene_exprs.csv
 
 ### Task 3.2. Import and reorganise the gene expression data 
 ```r
@@ -158,12 +158,12 @@ gsub("a.*a", "12345", c("apple", "banana", "guava", "avocado"))
 	myFun_plot <- function(in_df, x, y){
 		plot_df <- data.frame(x = in_df[[x]], y = in_df[[y]])
 		p1 <- ggplot(data=plot_df, aes(x=x, y=y)) + 
-          geom_point() + 
-          ggtitle(y) + 
-          xlab(x) +
-          ylab(y) +
-          theme_bw()
-        print(p1)
+		geom_point() + 
+		ggtitle(y) + 
+		xlab(x) +
+		ylab(y) +
+		theme_bw()
+		print(p1)
 	}
 ```
 
