@@ -99,6 +99,9 @@ p2
 g <- arrangeGrob(p1, p2, nrow=1)
 grid.draw(g)
 ggsave("output/plot_d2_t5-2.pdf", g)
+# You can specify the size of the plot you want to save
+ggsave("output/plot_d2_t5-2.pdf", g, width = 20, height = 10)
+
 
 ```
 
@@ -155,37 +158,37 @@ gsub("a.*a", "12345", c("apple", "banana", "guava", "avocado"))
 
 ### Task 3.3. Make a plotting function
 ```r
-	myFun_plot <- function(in_df, x, y){
-		plot_df <- data.frame(x = in_df[[x]], y = in_df[[y]])
-		p1 <- ggplot(data=plot_df, aes(x=x, y=y)) + 
+myFun_plot <- function(in_df, x, y){
+	plot_df <- data.frame(x = in_df[[x]], y = in_df[[y]])
+	p1 <- ggplot(data=plot_df, aes(x=x, y=y)) + 
 		geom_point() + 
 		ggtitle(y) + 
 		xlab(x) +
 		ylab(y) +
 		theme_bw()
 		print(p1)
-	}
+}
 ```
 
 ### Task 3.4. Loop through the genes
 ```r
-	# Organise your genes
-	genes <- "TERT,ELOVL3,KRT79"
-	genes <- strsplit(genes, ",")[[1]]
-	# Loop through the genes
-	for(current_gene in genes){
-		myFun_plot(gene_exprs_annotated, x="AGE", y=current_gene)
-	}
+# Organise your genes
+genes <- "TERT,ELOVL3,KRT79"
+genes <- strsplit(genes, ",")[[1]]
+# Loop through the genes
+for(current_gene in genes){
+	myFun_plot(gene_exprs_annotated, x="AGE", y=current_gene)
+}
 ```
 
 ### Task 3.5. Nested loop through genes and annotations
 ```r
-	# Loop through the genes
-	for(current_gene in genes){
-        for(current_annotation in c("AGE", "SMTSD", "SEX")){
-		    myFun_plot(gene_exprs_annotated, x=current_annotation, y=current_gene)
-        }
-    }
+# Loop through the genes
+for(current_gene in genes){
+	for(current_annotation in c("AGE", "SMTSD", "SEX")){
+		myFun_plot(gene_exprs_annotated, x=current_annotation, y=current_gene)
+	}
+}
     
 ```
 
