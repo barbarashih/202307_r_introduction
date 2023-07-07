@@ -1,4 +1,4 @@
-# Day 2 homework
+# Day 3 homework
 ## Spot the errors
 Copy/paste these code, and try to fix them to make working code
 
@@ -16,7 +16,7 @@ You can use sep="," to change the default separator (see Task 5.4 for examples o
 ```r
 # Read in dataframe
 # Download the data from
-# https://raw.githubusercontent.com/barbarashih/202307_r_introduction/main/data/day2/gene_exprs_annotated.csv
+# https://raw.githubusercontent.com/barbarashih/202307_r_introduction/main/data/day3/gene_exprs_annotated.csv
 plot_df <- read.delim("data/day3/gene_exprs_annotated.csv")
 ```
 		
