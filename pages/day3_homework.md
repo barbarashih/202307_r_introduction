@@ -59,6 +59,7 @@ ggplot(data=plot_df, aes(x=AGE, y=TRET, colour= SMTSD, size=AGE)) +
 
 ## Tasks
 ### Task 1.
+Create your own sum function.
 <details><summary>Hint 1 </summary> 
 Look at food_count in Day 2 Spot the error 3, for inspiration on how you might set a starting variable to keep your count.
 </details>
@@ -68,13 +69,13 @@ You can loop through the length of the input vector, and add on each element of 
 <details><summary>Hint 3 </summary> 
 Consider food_count in Day 2 Spot the error 3. In each loop, 1 was added to food_count. Can you add each element of a vector instead?
 </details>
-Create your own sum function.
+
 
 ### Task 2.
+Create your own mean function.
 <details><summary>Hint 1 </summary> 
 Similar to Task 1 on how to make your own sum function, except you would need to divide by the length to get mean.
 </details>
-Create your own mean function.
 
 ### Task 3 (in progress.. check back later)
 - Save each figure you have created in the loop.
