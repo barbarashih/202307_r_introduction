@@ -257,7 +257,7 @@ p + facet_wrap(~ageGroup) + theme_bw()
 p <- ggplot(data = plot_df, aes(x=AGE, y=TERT)) + 
   geom_point(position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw()
-# Colour points by AGE
+# Colour points by SMTSD
 p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw()
@@ -266,10 +266,11 @@ p
 
 ### Task 5.4. Change y-axis to log-scale
 ```r
-p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD, shape=SEX)) + 
+p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw() + scale_y_log10()
 p
+# You get warnings because some of the values are zeros, and log 0 is not a real number
 ```
 
 ### Task 5.5. Dot shape, colour and fill
@@ -289,7 +290,7 @@ p
 
 You would run into an error in the line above because the SEX column is made up of integers (i.e. continuous numbers rather than catogeries), but we're trying to plot different shapes with it. 
 ```
-# 
+# Check the data type 
 class(plot_df$SEX)
 # To get around this problem, you can turn them into strings with ifelse
 # if TRUE, do something, otherwise do something else
@@ -360,12 +361,27 @@ p
 install.packages("viridis")
 library(viridis)
 
+
 # Overwrite colour scheme
 # https://sjmgarnier.github.io/viridis/reference/scale_viridis.html
-p <- p + scale_color_viridis()
-p <- p + scale_color_viridis(option="A")
+# Example of viridis discrete (i.e. catogeries, so in this case the 2 different SMTSD)
+p <- p + scale_fill_viridis_d() 
 
-# You can also specify 
+# Default continuous fill colours
+p <- ggplot(data = plot_df, aes(x=ageGroup_f2, y=TERT, fill=TERT, shape=SEX)) + 
+  geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() +  scale_y_log10() +
+  scale_shape_manual(values=c(21, 25)) 
+p
+  
+# Example of viridis continuous (i.e. continuous numbers. In this case TERT expression) 
+p <- ggplot(data = plot_df, aes(x=ageGroup_f2, y=TERT, fill=TERT, shape=SEX)) + 
+  geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
+  theme_bw() +  scale_y_log10() +
+  scale_shape_manual(values=c(21, 25)) +
+  scale_fill_viridis()
+p
+
 ```
 
 
