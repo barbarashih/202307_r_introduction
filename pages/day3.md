@@ -285,8 +285,14 @@ p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD, shape=SEX)) +
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 
   theme_bw() + scale_y_log10() 
 p
-head(plot_df)
-# if TRUE, do something, otherwise something else
+```
+
+You would run into an error in the line above because the SEX column is made up of integers (i.e. continuous numbers rather than catogeries), but we're trying to plot different shapes with it. 
+```
+# 
+class(plot_df$SEX)
+# To get around this problem, you can turn them into strings with ifelse
+# if TRUE, do something, otherwise do something else
 plot_df$SEX <- ifelse(plot_df$SEX == 1, "M", "F")
 p <- ggplot(data = plot_df, aes(x=AGE, y=TERT, colour=SMTSD, shape=SEX)) + 
   geom_point(size = 5, position = position_jitter(w = 0.2, h = 0)) + 

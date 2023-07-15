@@ -1,4 +1,4 @@
-# Day 3 homework
+# Day 2 homework
 ## Spot the errors
 Copy/paste these code, and try to fix them to make working code
 
@@ -16,7 +16,7 @@ You can use sep="," to change the default separator (see Task 5.4 for examples o
 ```r
 # Read in dataframe
 # Download the data from
-# https://raw.githubusercontent.com/barbarashih/202307_r_introduction/main/data/day3/gene_exprs_annotated.csv
+# https://raw.githubusercontent.com/barbarashih/202307_r_introduction/main/data/day2/gene_exprs_annotated.csv
 plot_df <- read.delim("data/day3/gene_exprs_annotated.csv")
 ```
 		
@@ -59,7 +59,6 @@ ggplot(data=plot_df, aes(x=AGE, y=TRET, colour= SMTSD, size=AGE)) +
 
 ## Tasks
 ### Task 1.
-Create your own sum function.
 <details><summary>Hint 1 </summary> 
 Look at food_count in Day 2 Spot the error 3, for inspiration on how you might set a starting variable to keep your count.
 </details>
@@ -69,15 +68,18 @@ You can loop through the length of the input vector, and add on each element of 
 <details><summary>Hint 3 </summary> 
 Consider food_count in Day 2 Spot the error 3. In each loop, 1 was added to food_count. Can you add each element of a vector instead?
 </details>
-
+Create your own sum function.
 
 ### Task 2.
-Create your own mean function.
 <details><summary>Hint 1 </summary> 
 Similar to Task 1 on how to make your own sum function, except you would need to divide by the length to get mean.
 </details>
+Create your own mean function.
 
 ### Task 3 (in progress.. check back later)
-- Save each figure you have created in the loop.
-
-
+Use the data from Day 3 Section 3, plot:
+- These genes: TERT,ELOVL3,KRT79 as y-axis
+- Age group as x-axis
+- Make boxplot (try googling how to use ggplot to make boxplot)
+- Use grid.draw(g) to make the plot side by side for the two SMTSD (i.e. right hand side plot is for lower leg, and left hand side plot is for sun protected)
+- Save each plot with a different file name
