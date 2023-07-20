@@ -1,13 +1,17 @@
 #### Script for calculating the significance of gene expression on survival in RNAseq data from TCGA
-# Other notes
-# Include Option to colour samples using markers published by other papers 
-# (see clinical_annotation for the columns starting with paper_) ? (this is for PCA)
+# Other notes (things to think about)
+# - Include Option to colour samples using markers published by other papers 
+#   (see clinical_annotation for the columns starting with paper_) ? (this is for PCA)
+# - Duplicated samples (patients having multiple samples)
+# - Patient treatment (splitting the survival analysis into two to take this into account?)
 
 library(TCGAbiolinks)
 library(SummarizedExperiment)
+library(edgeR)
 
 setwd("C:/Users/bshih/Documents/tmp/nwcr")
 
+#### Define query
 project <- "TCGA-SKCM"
 
 query_RNASeq <- GDCquery(project = project,          
@@ -17,16 +21,16 @@ query_RNASeq <- GDCquery(project = project,
 	experimental.strategy = "RNA-Seq" )
 RNAseq_samples <- getResults(query_RNASeq)
 
+#### Prepare data from query
 data_RNAseq <- GDCprepare(query_RNASeq)
 data_clinic <- GDCquery_clinic(project, "clinical")
 
-
-# use SummarizedExperiment to look at the data
+# use SummarizedExperiment library to extract relevant information
 # https://bioconductor.org/packages/devel/bioc/vignettes/TCGAbiolinks/inst/doc/download_prepare.html#GDCdownload
-count_mx <- assay(data_RNAseq, "unstranded") # count matrix
-tpm_mx <- assay(data_RNAseq, "tpm_unstrand") # tpm matrix
-clinical_annotation <- colData(data_RNAseq)
-gene_annotation <- rowData(data_RNAseq)
+# tpm_mx <- assay(data_RNAseq, "tpm_unstrand") # tpm matrix; don't need this
+count_mx <- assay(data_RNAseq, "unstranded") # gene count matrix
+clinical_annotation <- colData(data_RNAseq) # clinical annotation data
+gene_annotation <- rowData(data_RNAseq) # gene annotation data
 
 # Normalise count matrix 
 dgelist <- DGEList(counts=count_mx, genes=gene_annotation)
@@ -34,8 +38,11 @@ dgelist <- calcNormFactors(dgelist)
 normcounts<-cpm(dgelist, normalized.lib.sizes = T)
 
 
-### Note
-# Remove control samples (or note down control samples)
+### Note (not done yet)
+# You might want to consider:
+# - Removing control samples (or note down control samples)
+# - Removing samples of poor quality
+# - Removing duplicated samples from the same patient
 tmp_reorganised_log2 <- log2(normcounts + 1)
 
 data_clinic_filt <- data_clinic[, c("bcr_patient_barcode", "vital_status", "days_to_death", "days_to_last_follow_up")]
