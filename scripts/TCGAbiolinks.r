@@ -79,12 +79,14 @@ for( i in 1: round(nrow(tmp_reorganised_log2)/100)){
 tabSurvKMcomplete <- tabSurvKMcomplete[tabSurvKMcomplete$pvalue < 0.01,]
 tabSurvKMcomplete <- tabSurvKMcomplete[order(tabSurvKMcomplete$pvalue, decreasing=F),]
 
-#
+
+#### Snippets of code that might be useful
+# This currently doesn't work.
+# input_gene_list would be the list of genes of interest, 
+# but depending on the user input (ensembl ID or gene name), this would need to be processed
 tabSurvKMcompleteDEGs <- tabSurvKMcomplete[
-    rownames(tabSurvKMcomplete) %in% dataDEGsFiltLevel$mRNA,
+    rownames(tabSurvKMcomplete) %in% input_gene_list,
 ]
-
-
 
 
 # Example of how to analyse survival using clinical annotation/annotation 
