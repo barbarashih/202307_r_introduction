@@ -17,13 +17,19 @@
 # --- Gene annotation (optional):
 # - The first column is the gene id that matches those in count file
 
-working_directory <- ""											# !!! CHANGE !!!
-species <- "mouse"												# !!! CHANGE !!! "mouse" or "human"
-count_filepath <- "data/count_file.csv" 						# !!! CHANGE !!! The gene count matrix (first column gene_id, first row sample_id, everything else numbers)
-sample_annotation_filepath <-  "data/sample_annotation.csv"		# !!! CHANGE !!! 
-gene_annotation_filepath <- ""									# !!! CHANGE !!! Leave this as "" if you don't have genome annotation
+# Note that if a file is in a subfolder in your working directory, you can use / to indicate the subfolder
+# For instance, if my count_mx.csv file is in a folder "data" in my working directory, 
+# then I would refer to it as "data/count_mx.csv"
+working_directory <- "C:/Users/shihb/AppData/Local/r_working"     # !!! CHANGE !!! Change to the folder you want to work from (where your files are)
+species <- "mouse"												                        # !!! CHANGE !!! "mouse" or "human"
+count_filepath <- "count_mx.csv" 					                  	    # !!! CHANGE !!! The gene count matrix (first column gene_id, first row sample_id, everything else numbers)
+sample_annotation_filepath <-  "sample_annotation.csv"         		# !!! CHANGE !!! 
+gene_annotation_filepath <- ""									                  # !!! CHANGE !!! Leave this as "" if you don't have genome annotation
+gene_id_type <- "entrezgene"                                      # !!! CHANGE !!! choose between entrezgene or ensembl
 
 setwd(working_directory)										# set your working directory
+
+
 
 #### Section 1: Download library
 # install packagws if you dont already have them
@@ -39,7 +45,8 @@ if (!require("edgeR", quietly = TRUE)){ BiocManager::install("edgeR") }
 if (!require("gplots", quietly = TRUE)){ install.packages("gplots") }	
 # Install biomaRt for gene annotation
 if (!require("biomaRt", quietly = TRUE)){ BiocManager::install("biomaRt") }	
-
+# Install R.utils
+if (!require("R.utils", quietly = TRUE)){ install.packages("R.utils") }	
 
 
 #### Section 2: Load library
@@ -55,29 +62,35 @@ library(biomaRt)
 
 #### Section 3: Read in csv files for your study and make a DEGList object
 # Read in files
-count_mx <- read.csv(count_filepath)
+count_mx <- read.csv(count_filepath, row.names=1)
 sample_annotation <- read.csv(sample_annotation_filepath)
 
 # Download gene annotation if you don't already have one
 if(nchar(gene_annotation_filepath) == 0){
 	biomart_dataset <- ifelse(tolower(species) == "mouse", "mmusculus_gene_ensembl", "hsapiens_gene_ensembl")
 	ensembl <- useEnsembl(biomart = "genes", dataset = biomart_dataset)
-	gene_annotation <- getBM(attributes = c('ensembl_gene_id', 'hgnc_symbol', 'description', 'chromosome_name'), mart = ensembl)
+	if(gene_id_type == "entrezgene"){
+	  gene_annotation <- getBM(attributes = c('entrezgene_id', 'ensembl_gene_id', 'hgnc_symbol', 'description', 'chromosome_name'), mart = ensembl)
+	} else {
+	  gene_annotation <- getBM(attributes = c('ensembl_gene_id', 'hgnc_symbol', 'description', 'chromosome_name'), mart = ensembl)
+	}
 	colnames(gene_annotation)[1] <- "gene_id"
 # if there is a input gene_annotation_filepath, read in the file and set the first column name as gene_id
 } else {
 	gene_annotation <- read.csv(gene_annotation_filepath)
 	colnames(gene_annotation)[1] <- "gene_id"
 }
-
+gene_annotation <- merge(data.frame(gene_id = row.names(count_mx)), gene_annotation, by.x="gene_id", by.y=colnames(gene_annotation)[1], all.x=TRUE)
+gene_annotation <- gene_annotation[!duplicated(gene_annotation$gene_id),]
+  
 # Make DGElist object
 x <- DGEList(counts = count_mx, genes = gene_annotation, group = sample_annotation$group, samples= sample_annotation)
-
 
 
 #### Section 4: Remove lowly expressed genes
 ## Keep a record of the log(count per million) data before filtering the genes
 lcpm <- cpm(x, log=TRUE)
+
 
 ## Filter out lowly expressed genes
 keep.exprs <- filterByExpr(x, group=group)
@@ -119,6 +132,8 @@ lines(den$x, den$y, col=col_vec_plot[i], lwd=2)
 }
 legend("topright", colnames(x), text.col=col_vec_plot, bty="n")
 
+
+
 #### Section 5: Normalising gene distribution
 # In the tutorial, it created x2 to generate a modified dataset where there are two unusual samples that have wildly different distribution
 # You don't need to do that for actually running your analysis
@@ -126,7 +141,7 @@ legend("topright", colnames(x), text.col=col_vec_plot, bty="n")
 # (note this will probably not be the case when you're analysing metabolomic or proteomic data due to the large number of missing values)
 x <- calcNormFactors(x, method = "TMM")				# Normalise data
 par(mfrow=c(1,1)) 									# Split the plotting window into 1 row and 2 columns
-boxplot(lcpm_filtered, las=2, col=col, main="")
+boxplot(lcpm_filtered, las=2, col=col_vec_plot)
 title(main="B. Example: Normalised data",ylab="Log-cpm")
 
 
@@ -179,6 +194,7 @@ summary(decideTests(efit))
 # treat is used to calculate p values with a minimum log-fold-change requirement. The log in limma refer to log2
 tfit <- treat(vfit, lfc=1)									# !!! CHANGE !!! change lfc (log-fold-change) to other values if you want a slightly different threshold for log fold change
 summary(decideTests(efit))						
+dt <- decideTests(tfit)
 
 # Find the proportion of commonly differentially expressed genes across your comparisons
 # Here is an example comparing the first and second comparisons you stated in contrast.matrix
@@ -193,11 +209,14 @@ statsResutls2 <- topTreat(tfit, coef=2, n=Inf)				# Get differentially expressed
 head(statsResutls1)											# Look at the top of the stats table
 head(statsResutls2)											# Look at the top of the stats table
 
+# Save stats table
+write.csv(statsResutls1, "stats_table1.csv")          # repeat the same for each coefficient
+
 #### Explore the differentially expressed genes in MDplot
 gene_id_name <- "gene_id"									# you can change this to a different column name in your gene_annotation
 contrast_mx_comp_coef <- 1									# !!! CHANGE !!! change contrast_mx_comp_coef to the comparison ID from contrast.matrix (i.e. 1 for first comparison, 2 for second... so on)
-glMDPlot(tfit, coef=contrast_mx_comp_coef, status=dt, main=colnames(tfit)[contrast_mx_comp_coef],  # change tfit to efit if you don't want to have the stringent log-fold-change cutoff
-         side.main=gene_id_name, counts=lcpm, groups=x$samples$group, launch=TRUE)
+glMDPlot(tfit, coef=contrast_mx_comp_coef, status=dt, main=colnames(tfit)[contrast_mx_comp_coef],
+         side.main=gene_id_name, counts=lcpm_filtered, groups=x$samples$group, launch=TRUE)
 		 
 
 #### Section 9: Heatmap for top significant genes
