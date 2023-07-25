@@ -78,6 +78,10 @@ if(nchar(gene_annotation_filepath) == 0){
 # if there is a input gene_annotation_filepath, read in the file and set the first column name as gene_id
 } else {
 	gene_annotation <- read.csv(gene_annotation_filepath)
+	if("gene_id" %in% colnames(gene_annotation)){
+		colname_gene_id <- grep("gene_id", colnames(gene_annotation))
+		colnames(gene_annotation)[colname_gene_id] <- "gene_id.1"
+	}
 	colnames(gene_annotation)[1] <- "gene_id"
 }
 gene_annotation <- merge(data.frame(gene_id = row.names(count_mx)), gene_annotation, by.x="gene_id", by.y=colnames(gene_annotation)[1], all.x=TRUE)
@@ -219,7 +223,7 @@ glMDPlot(tfit, coef=contrast_mx_comp_coef, status=dt, main=colnames(tfit)[contra
          side.main=gene_id_name, counts=lcpm_filtered, groups=x$samples$group, launch=TRUE)
 		 
 
-#### Section 9: Heatmap for top significant genes
+#### Section 10: Heatmap for top significant genes
 gene_plot_name <- "SYMBOL"										# !!! CHANGE !!! change this to your the column name of gene_annotation that you want to use for the plot
 comparison1_top_genes <- row.names(statsResutls1)[1:100]		# Change 100 to the number of top genes you want to plot
 i <- which(v$genes$gene_id %in% comparison1_top_genes)			# find out the indexes for the genes of interest 
