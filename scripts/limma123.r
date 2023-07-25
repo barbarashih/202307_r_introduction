@@ -159,10 +159,10 @@ glMDSPlot(lcpm_filtered, labels=colnames(x),
 #### Section 7: Differential gene expression 
 # !!! You need to edit this section according to your study
 # Carefully read through the comments to make sure you the relevant variables in each line
-design <- model.matrix(~0+group+lane)						# !!!! CHANGE !!!! Change group and lane to your variables of interest (i.e. tissue, timepoint). Colon indicates interaction term
-#design <- model.matrix(~0+group+lane+group:lane)			# Colon indicates interaction term and might be relevent if for example you want to compare brain Day7 vs brain Day0
-colnames(design) <- gsub("group", "", colnames(design))		# !!!! CHANGE !!!! Do this for the variables you have included above
-colnames(design) <- gsub("lane", "", colnames(design))		# !!!! CHANGE !!!! Do this for the variables you have included above
+#design <- model.matrix(~0+group+lane+group:lane, data=sample_annotation)			# Colon indicates interaction term and might be relevent if for example you want to compare brain Day7 vs brain Day0
+design <- model.matrix(~0+group+lane, data=sample_annotation)		# !!!! CHANGE !!!! Change group and lane to your variables of interest (i.e. tissue, timepoint). Colon indicates interaction term 
+colnames(design) <- sub("group", "", colnames(design))		# !!!! CHANGE !!!! Do this for the variables you have included above
+colnames(design) <- sub("lane", "", colnames(design))		# !!!! CHANGE !!!! Do this for the variables you have included above
 head(design)												# !!!! CHANGE !!!! Use the column names in design for making contrast fit (below)
 
 contrast.matrix <- makeContrasts(							# !!!! CHANGE !!!! change this to what your comparisons are
