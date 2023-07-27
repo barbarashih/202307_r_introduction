@@ -17,11 +17,17 @@
 # --- Gene annotation (optional):
 # - The first column is the gene id that matches those in count file
 
-working_directory <- ""											# !!! CHANGE !!!
-species <- "mouse"												# !!! CHANGE !!! "mouse" or "human"
-count_filepath <- "data/limma123/count_file.csv" 						# !!! CHANGE !!! The gene count matrix (first column gene_id, first row sample_id, everything else numbers)
-sample_annotation_filepath <-  "data/limma123/sample_annotation.csv"		# !!! CHANGE !!! 
-gene_annotation_filepath <- ""									# !!! CHANGE !!! Leave this as "" if you don't have genome annotation
+
+# Note that if a file is in a subfolder in your working directory, you can use / to indicate the subfolder
+# For instance, if my count_mx.csv file is in a folder "data" in my working directory, 
+# then I would refer to it as "data/count_mx.csv"
+working_directory <- "C:/Users/shihb/OneDrive - Lancaster University/work/teaching/workshop/202307_r_introduction"     # !!! CHANGE !!! Change to the folder you want to work from (where your files are)
+species <- "mouse"												                        # !!! CHANGE !!! "mouse" or "human"
+count_filepath <- "data/limma123/count_file.csv" 					                  	    # !!! CHANGE !!! The gene count matrix (first column gene_id, first row sample_id, everything else numbers)
+sample_annotation_filepath <-  "data/limma123/sample_annotation.csv"         		# !!! CHANGE !!! 
+gene_annotation_filepath <- ""									                  # !!! CHANGE !!! Leave this as "" if you don't have genome annotation
+gene_id_type <- "entrezgene"                                      # !!! CHANGE !!! choose between entrezgene or ensembl
+
 
 setwd(working_directory)										# set your working directory
 
@@ -39,7 +45,8 @@ if (!require("edgeR", quietly = TRUE)){ BiocManager::install("edgeR") }
 if (!require("gplots", quietly = TRUE)){ install.packages("gplots") }	
 # Install biomaRt for gene annotation
 if (!require("biomaRt", quietly = TRUE)){ BiocManager::install("biomaRt") }	
-
+# Install R.utils
+if (!require("R.utils", quietly = TRUE)){ install.packages("R.utils") }	
 
 
 #### Section 2: Load library
@@ -55,20 +62,27 @@ library(biomaRt)
 
 #### Section 3: Read in csv files for your study and make a DEGList object
 # Read in files
-count_mx <- read.csv(count_filepath)
+count_mx <- read.csv(count_filepath, row.names=1)
 sample_annotation <- read.csv(sample_annotation_filepath)
 
 # Download gene annotation if you don't already have one
 if(nchar(gene_annotation_filepath) == 0){
 	biomart_dataset <- ifelse(tolower(species) == "mouse", "mmusculus_gene_ensembl", "hsapiens_gene_ensembl")
 	ensembl <- useEnsembl(biomart = "genes", dataset = biomart_dataset)
-	gene_annotation <- getBM(attributes = c('ensembl_gene_id', 'hgnc_symbol', 'description', 'chromosome_name'), mart = ensembl)
+	if(gene_id_type == "entrezgene"){
+		  gene_annotation <- getBM(attributes = c('entrezgene_id', 'ensembl_gene_id', 'hgnc_symbol', 'description', 'chromosome_name'), mart = ensembl)
+		} else {
+		  gene_annotation <- getBM(attributes = c('ensembl_gene_id', 'hgnc_symbol', 'description', 'chromosome_name'), mart = ensembl)
+		}	
 	colnames(gene_annotation)[1] <- "gene_id"
 # if there is a input gene_annotation_filepath, read in the file and set the first column name as gene_id
 } else {
 	gene_annotation <- read.csv(gene_annotation_filepath)
 	colnames(gene_annotation)[1] <- "gene_id"
 }
+gene_annotation <- merge(data.frame(gene_id = row.names(count_mx)), gene_annotation, by.x="gene_id", by.y=colnames(gene_annotation)[1], all.x=TRUE)
+gene_annotation <- gene_annotation[!duplicated(gene_annotation$gene_id),]
+
 
 # Make DGElist object
 x <- DGEList(counts = count_mx, genes = gene_annotation, group = sample_annotation$group, samples= sample_annotation)
@@ -80,7 +94,7 @@ x <- DGEList(counts = count_mx, genes = gene_annotation, group = sample_annotati
 lcpm <- cpm(x, log=TRUE)
 
 ## Filter out lowly expressed genes
-keep.exprs <- filterByExpr(x, group=group)
+keep.exprs <- filterByExpr(x, group=sample_annotation$group)
 x <- x[keep.exprs,, keep.lib.sizes=FALSE]
 
 ## Look at data distribution before and after filtering
@@ -126,7 +140,7 @@ legend("topright", colnames(x), text.col=col_vec_plot, bty="n")
 # (note this will probably not be the case when you're analysing metabolomic or proteomic data due to the large number of missing values)
 x <- calcNormFactors(x, method = "TMM")				# Normalise data
 par(mfrow=c(1,1)) 									# Split the plotting window into 1 row and 2 columns
-boxplot(lcpm_filtered, las=2, col=col, main="")
+boxplot(lcpm_filtered, las=2, col=col_vec_plot)
 title(main="B. Example: Normalised data",ylab="Log-cpm")
 
 
@@ -142,7 +156,7 @@ glMDSPlot(lcpm_filtered, labels=colnames(x),
 # Carefully read through the comments to make sure you the relevant variables in each line
 ### !!! NOTE !!! If you labelled your catogeries as 1, 2, 3, it would be considered as numeric rather than catogerial. 
 # I would recommmand appending a letter like this paste0("g", sample_annotation$grouping_with_num)
-design <- model.matrix(~0+group+lane)						# !!!! CHANGE !!!! Change group and lane to your variables of interest (i.e. tissue, timepoint). Colon indicates interaction term
+design <- model.matrix(~0+group+lane, data=sample_annotation)						# !!!! CHANGE !!!! Change group and lane to your variables of interest (i.e. tissue, timepoint). Colon indicates interaction term
 #design <- model.matrix(~0+group+lane+group:lane)			# Colon indicates interaction term and might be relevent if for example you want to compare brain Day7 vs brain Day0
 colnames(design) <- gsub("group", "", colnames(design))		# !!!! CHANGE !!!! Do this for the variables you have included above
 colnames(design) <- gsub("lane", "", colnames(design))		# !!!! CHANGE !!!! Do this for the variables you have included above
@@ -177,7 +191,9 @@ plotSA(efit, main="Final model: Mean-variance trend")
 
 #### Section 8: Explore the numbers of differentially expressed genes
 # this sums up the total number of significantly differentially expressed genes
-summary(decideTests(efit))						
+summary(decideTests(efit))	
+dt <- decideTests(tfit)
+					
 # this sums up the total number of significantly differentially expressed genes, but is a bit more stringent
 # treat is used to calculate p values with a minimum log-fold-change requirement. The log in limma refer to log2
 tfit <- treat(vfit, lfc=1)									# !!! CHANGE !!! change lfc (log-fold-change) to other values if you want a slightly different threshold for log fold change
@@ -196,22 +212,28 @@ statsResutls2 <- topTreat(tfit, coef=2, n=Inf)				# Get differentially expressed
 head(statsResutls1)											# Look at the top of the stats table
 head(statsResutls2)											# Look at the top of the stats table
 
+# Save stats table
+for(coef_idx in 1:ncol(contrast.matrix)){
+	coef_name <- colnames(contrast.matrix)[coef_idx]
+	write.csv(statsResutls1, paste0("stats_table_", coef_name, ".csv"))          # repeat the same for each coefficient
+}
+
 #### Explore the differentially expressed genes in MDplot
 gene_id_name <- "gene_id"									# you can change this to a different column name in your gene_annotation
 contrast_mx_comp_coef <- 1									# !!! CHANGE !!! change contrast_mx_comp_coef to the comparison ID from contrast.matrix (i.e. 1 for first comparison, 2 for second... so on)
 for(coef_idx in 1:ncol(contrast.matrix)){
-	glMDPlot(tfit, coef=coef_idx, status=dt, main=colnames(tfit)[coef_idx],  # change tfit to efit if you don't want to have the stringent log-fold-change cutoff
-			 side.main=gene_id_name, counts=lcpm, groups=x$samples$group, launch=TRUE)
+	glMDPlot(tfit, coef=coef_idx, status=dt, main=colnames(tfit)[coef_idx],
+         side.main=gene_id_name, counts=lcpm_filtered, groups=x$samples$group, launch=TRUE)
 }		 
 
 #### Section 9: Heatmap for top significant genes
-gene_plot_name <- "SYMBOL"										# !!! CHANGE !!! change this to your the column name of gene_annotation that you want to use for the plot
+gene_plot_name <- "hgnc_symbol"										# !!! CHANGE !!! change this to your the column name of gene_annotation that you want to use for the plot
 comparison1_top_genes <- row.names(statsResutls1)[1:100]		# Change 100 to the number of top genes you want to plot
 i <- which(v$genes$gene_id %in% comparison1_top_genes)			# find out the indexes for the genes of interest 
 mycol <- colorpanel(1000,"blue","white","red")					# generate plot colours
-heatmap.2(lcpm[i,], scale="row",								# Plot heatmap 
+heatmap.2(lcpm_filtered[i,], scale="row",								# Plot heatmap 
    labRow=v$genes[[gene_plot_name]][i], labCol=x$samples$group, 
    col=mycol, trace="none", density.info="none", 
-   margin=c(8,6), lhei=c(2,10), dendrogram="column")
+    dendrogram="column")
    
    
