@@ -82,8 +82,8 @@ pca_plot_df <- merge(food_annotation, as.data.frame(res_pca$x), by.x="wide_df_co
 
 #### Section 2: Plotting every possible combination of dimentions and save the plots
 dir.create("pca_output", showWarnings = FALSE)
-for(PC_x in 1:ncol(coordinates)){
-	for(PC_y in 1:ncol(coordinates)){
+for(PC_x in 1:ncol(pca_positions)){
+	for(PC_y in 1:ncol(pca_positions)){
 		# the if statement is to remove duplicate plots (i.e. it will just plot PC3 vs PC4, and not PC4 vs PC3)
 		if(PC_x < PC_y){
 			plotting_dimentions <- c(PC_x, PC_y)
@@ -106,13 +106,15 @@ for(PC_x in 1:ncol(coordinates)){
 			print(head(top_contrib_nutrients_y))
 
 			## plot PCA
-			current_pca_plot_df <- pca_plot_df[,c(paste0("PC", PC_x), paste0("PC", PC_y))]
-			colnames(current_pca_plot_df)[1:2] <- c("PC_x", "PC_y")
-			p <- ggplot(data=pca_plot_df, aes(x=PC_x, y=PC_y)) + 
-				geom_point(aes(colour=Lactose)) +
+			current_pca_plot_df <- pca_plot_df[,c("wide_df_colnames_match", "food_category_id", "food_name", paste0("PC", PC_x), paste0("PC", PC_y))]
+			colnames(current_pca_plot_df) <- c("food_id", "food_category_id", "food_name", "PC_x", "PC_y")
+			current_pca_plot_df$food_category_id <- factor(current_pca_plot_df$food_category_id )
+			p <- ggplot(data=current_pca_plot_df, aes(x=PC_x, y=PC_y)) + 
+				geom_point(aes(colour=food_category_id), size=3) +
 				theme_bw() + geom_text(aes(label=food_name)) +
-				xlab(paste0(PC_x, " (", pca_summary[PC_x], ")")) + ylab(paste0(PC_y, " (", pca_summary[PC_y], ")")) + 
-				scale_colour_viridis()
+				xlab(paste0(PC_x, " (", pca_summary[PC_x], ")")) + 
+				ylab(paste0(PC_y, " (", pca_summary[PC_y], ")")) + 
+				scale_colour_viridis_d()
 			# ggplotly(p) # remove the comment if you want a interactive plot
 			ggsave(paste0("pca_output/PC", PC_x, "_PC", PC_y, ".png"))
 		}
@@ -180,6 +182,7 @@ pca_plot_function <- function(in_mx, in_annotation, query_nutrient){
 ## Use the function to plot the two PCs where a given nutrient has the strongest contribution to
 pca_plot_function(pca_input, food_annotation, "Energy")
 pca_plot_function(pca_input, food_annotation, "Protein")
+pca_plot_function(pca_input, food_annotation, "Sucrose")
 pca_plot_function(pca_input, food_annotation, "Glucose")
 pca_plot_function(pca_input, food_annotation, "Calcium..Ca")
 pca_plot_function(pca_input, food_annotation, "Lactose")
