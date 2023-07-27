@@ -112,8 +112,8 @@ for(PC_x in 1:ncol(pca_positions)){
 			p <- ggplot(data=current_pca_plot_df, aes(x=PC_x, y=PC_y)) + 
 				geom_point(aes(colour=food_category_id), size=3) +
 				theme_bw() + geom_text(aes(label=food_name)) +
-				xlab(paste0(PC_x, " (", pca_summary[PC_x], ")")) + 
-				ylab(paste0(PC_y, " (", pca_summary[PC_y], ")")) + 
+				xlab(paste0("PC", PC_x, " (", pca_summary[PC_x], ")")) + 
+				ylab(paste0("PC", PC_y, " (", pca_summary[PC_y], ")")) + 
 				scale_colour_viridis_d()
 			# ggplotly(p) # remove the comment if you want a interactive plot
 			ggsave(paste0("pca_output/PC", PC_x, "_PC", PC_y, ".png"))
