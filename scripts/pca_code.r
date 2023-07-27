@@ -23,13 +23,15 @@ if (!require("ggcorrplot", quietly = TRUE)) { install.packages("ggcorrplot") }
 if (!require("factoextra", quietly = TRUE)) { install.packages("factoextra") } 
 if (!require("ggfortify", quietly = TRUE)) { install.packages("ggfortify") } 
 if (!require("umap", quietly = TRUE)) { install.packages("umap") } 
-if (!require("plotly", quietly = TRUE)) { install.packages("umap") } 
+if (!require("plotly", quietly = TRUE)) { install.packages("plotly") } 
+if (!require("viridis", quietly = TRUE)) { install.packages("viridis") } 
 library(stringr)
 library(ggcorrplot)
 library(factoextra)
 library(ggfortify)
 library(umap)
 library(plotly)
+library(viridis)
 
 
 #### Section 1: PCA
