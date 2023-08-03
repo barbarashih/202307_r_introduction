@@ -76,7 +76,7 @@ TCGAanalyze_SurvivalKM <- function(
 
     cfu_complete <- cfu
     ngenes <- nrow(as.matrix(rownames(dataNormal)))
-
+    out_plot_list <- list()
     # Evaluate each gene
     for (i in 1:nrow(as.matrix(rownames(dataNormal))))  {
         cat(paste0((ngenes - i), "."))
@@ -221,6 +221,8 @@ TCGAanalyze_SurvivalKM <- function(
                     pch = 15
                 )
                 print(tabSurv)
+		out_plot_list[[mRNAselected]] <- recordPlot()
+                plot.new()
             }
         } #end if
 
@@ -247,5 +249,5 @@ TCGAanalyze_SurvivalKM <- function(
         gsub("Normal", "Group1", colnames(tabSurvKM))
 
 
-    return(tabSurvKM)
+    return(list(stats=tabSurvKM, plots=out_plot_list))
 }
