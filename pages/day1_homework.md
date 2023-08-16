@@ -47,9 +47,19 @@ Go to https://gtexportal.org/home/datasets. Under GTEx Analysis V8 > Annotations
 
 Import 2) into R Studio as a dataframe. 
 
+
 Filter the dataframe so you only keep "Skin - Sun Exposed (Lower leg)" in the SMTSD column
-(use == for equal to)
+<details><summary>Hint 1 </summary> 
+Review the conditional operator section of the tutorial, where we used > to keep rows where Brain gene expression is higher than 0. 
+</details>
+<details><summary>Hint 2 </summary> 
+In this case, use == for equal to compare the annotation columns. Look at the GTEx_Analysis_v8_Annotations_SampleAttributesDD.xlsx to check which annotation column you would need to filter by.
+</details>
 
 Filter the dataframe so you keep only "RNASEQ" samples
+<details><summary>Hint 3 </summary> 
+Look at the GTEx_Analysis_v8_Annotations_SampleAttributesDD.xlsx to check which annotation column you would need to filter by.
+</details>
+
 
 Save the filtered dataframe
